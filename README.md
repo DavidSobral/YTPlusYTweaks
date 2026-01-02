@@ -177,6 +177,7 @@ Examples:
 - [FAQ](#faq)
 - [Supported YouTube Version](#supported-youtube-version)
 - [Tweak Integration Details](#tweak-integration-details)
+- [Credits](#credits)
 
 ## Screenshots
 <table>
@@ -303,3 +304,18 @@ Fill out an [issue form](https://github.com/fosterbarnes/YTPlusYTweaks/issues) w
   <p>Gonerino is a tweak developed by <a href="https://github.com/castdrian">castdrian</a> that lets you block certain content from your home feed.</p>
   <p>Source code and additional information are available <a href="https://github.com/castdrian/Gonerino">in castdrian's GitHub repository</a>.</p>
 </details>
+
+## Credits
+Thank you to everyone that made this project possible! This project would not exist without the existing tools made by these developers. I really appreciate your work :)
+
+[dayanch96](https://github.com/dayanch96) - YTLite
+
+[PoomSmart](https://github.com/PoomSmart) - YouPiP, YTUHD, Return YouTube Dislikes, YouQuality, YTABConfig, YTIcons, YouGroupSettings
+
+[therealFoxster](https://github.com/therealFoxster) - DontEatMyContent
+
+[castdrian](https://github.com/castdrian/Gonerino) - Gonerino
+
+[theos](https://github.com/theos) - theos, SDKs
+
+[Tonwalter888](https://github.com/Tonwalter888/) - SDKs
