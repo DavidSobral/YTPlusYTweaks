@@ -9,6 +9,7 @@ YTweaks added settings:
 - **Fullscreen to the right or left:** Locks fullscreen orientation.
 - **Disable floating miniplayer:** Restores the old miniplayer by disabling the floating miniplayer.
 - **Virtual fullscreen bezels:** Adds invisible touch-safe zones on black bars to prevent accidental taps and skips.
+- **Fix Casting** - Attempts to fix casting by changing some A/B flags. Only works on v20.10.4 or lower
 
 Experimental planned features
 - **Hide AI Summaries:** Hides AI summaries that appear in the feed.
@@ -43,11 +44,43 @@ If you plan on testing, adding other tweaks, making changes, or building very fr
     <li>Select "Build YTPlusYTweaks".</li>
     <li>Click "Run workflow".</li>
     <li>Select bundled tweaks.</li>
-    <li>Prepare a decrypted .ipa file <em>(we cannot provide this due to legal reasons)</em>, then upload it to a file provider (e.g., https://litterbox.catbox.moe, or Dropbox is recommended). Paste the URL of the decrypted IPA file in the provided field.
-    <strong>NOTE:</strong> Make sure to provide a direct download link to the file, not a link to a webpage. Otherwise, the process will fail.</li>
-    <li>Click "Run workflow".</li>
+    <li>
+        Prepare & upload base .ipa<br>
+        
+- Prepare a decrypted .ipa file (version 20.10.4 or earlier for Fix Casting to work). <br>
+<em>We cannot provide this file due to legal reasons.</em><br>
+
+- Upload the decrypted IPA to a file hosting service (e.g., litterbox.catbox.moe or Dropbox).<br>
+<em>If you use Dropbox, change the end of the URL from <code>dl=0</code> to <code>dl=1</code>.</em><br>
+
+- Paste the direct download link to the decrypted IPA into the provided field.<br>
+<em><strong>NOTE:</strong> Make sure to provide a direct download link to the file, not a webpage. Otherwise, the process will fail.</em><br>
+    </li>
+        
+<li>Click "Run workflow".</li>
     <td><img src="Resources/scr15.jpg" alt="Screenshot 15" /></td>
-    <li>Wait for the build to finish. You can download the YouTube Plus app from the releases section of your forked repo. (If you can't find the releases section, go to your forked repo and add /releases to the URL, i.e., github.com/user/YTPlusYTweaks/releases.)</li>
+    <li>Wait for the build to finish. You can download the YouTube Plus app from the releases section of your forked repo. (If you can't find the releases section, go to your forked repo and add /releases to the URL, i.e., github.com/user/YTPlusYTweaks/releases.)</li><br>
+    
+
+<strong>Additional workflow options:</strong><br>
+- The version of YTLite to use:<br>
+  <em>Input a release tag from [dayanch96/YTLite/tags](https://github.com/dayanch96/YTLite/tags)</em><br>
+  Example: `5.2b3` or `v5.2b3`<br>
+- iOS SDK Version:<br>
+  <em>16.5 should be used for older devices, 18.6 can be used for newer devices</em><br>
+  Example: `16.5`<br>
+- Inject pre-built DEB(s):<br>
+  <em>User-provided DEBs can be downloaded and injected alongside other tweaks. Either provide comma-separated direct download links to .deb files OR a direct download link to zipped .deb files</em><br>
+  .deb example: `https://litter.catbox.moe/1.deb, https://litter.catbox.moe/2.deb`<br>
+  .zip example: `https://litter.catbox.moe/debs.zip`<br>
+- App Name:<br>
+  <em>Display name for the app on the homescreen</em><br>
+  Example: `YTPlusYTweaks`<br>
+- BundleID:<br>
+  <em>Unique identifier assigned to every application. Change if you want to have multiple installs of YouTube</em><br>
+  Example: `com.google.ios.youtube2`<br>
+
+
   </ol>
 </details>
 

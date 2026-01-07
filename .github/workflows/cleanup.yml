@@ -1,10 +1,10 @@
-name: Cleanup Workflows and Releases
+name: Cleanup Workflows
 
 on:
   workflow_dispatch:
     inputs:
       confirm_cleanup:
-        description: "Type 'DELETE' to confirm cleanup of all workflows, artifacts, and draft releases"
+        description: "Type 'DELETE' to confirm cleanup of all workflows, artifacts, caches, and draft releases"
         required: true
         type: string
 
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   cleanup:
-    name: Cleanup Workflows, Artifacts, and Draft Releases
+    name: Cleanup Workflows, Artifacts, Caches, and Draft Releases
     runs-on: ubuntu-latest
     
     steps:
@@ -87,6 +87,31 @@ jobs:
           
           echo "Artifacts cleanup completed"
 
+      - name: Delete all workflow caches
+        run: |
+          echo "Fetching all caches..."
+          
+          page=1
+          while true; do
+            caches=$(curl -s -H "Authorization: token ${{ github.token }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/caches?per_page=100&page=$page" | \
+              jq -r '.actions_caches[].id')
+            
+            if [ -z "$caches" ]; then
+              break
+            fi
+            
+            for cache_id in $caches; do
+              echo "Deleting cache: $cache_id"
+              curl -X DELETE -s -H "Authorization: token ${{ github.token }}" \
+                "https://api.github.com/repos/${{ github.repository }}/actions/caches/$cache_id" || true
+            done
+            
+            page=$((page + 1))
+          done
+          
+          echo "Caches cleanup completed"
+
       - name: Delete all draft releases
         run: |
           echo "Fetching all draft releases..."
@@ -115,5 +140,5 @@ jobs:
       - name: Summary
         run: |
           echo "::notice::Cleanup completed successfully!"
-          echo "::notice::All workflow runs, artifacts, and draft releases have been deleted."
+          echo "::notice::All workflow runs, artifacts, caches, and draft releases have been deleted."
 
