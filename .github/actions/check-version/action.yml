@@ -1,0 +1,21 @@
+name: 'Check Workflow Version'
+description: 'Checks if the local workflow version is up to date with the main repository'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check Workflow Version
+      shell: bash
+      run: |
+        LOCAL_VERSION=$(cat .github/workflows/VERSION)
+        REMOTE_VERSION=$(curl -s https://raw.githubusercontent.com/fosterbarnes/YTPlusYTweaks/refs/heads/main/.github/workflows/VERSION)
+        
+        echo "Local: $LOCAL_VERSION | Remote: $REMOTE_VERSION"
+        
+        if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+          echo "::notice:: Workflow is up to date (v$LOCAL_VERSION)"
+        elif [ "$(printf '%s\n' "$LOCAL_VERSION" "$REMOTE_VERSION" | sort -V | head -n1)" = "$LOCAL_VERSION" ]; then
+          echo "::warning:: Your fork is outdated! Please sync your fork."
+        else
+          echo "::notice:: Your workflow ($LOCAL_VERSION) is newer than main repo ($REMOTE_VERSION)"
+        fi

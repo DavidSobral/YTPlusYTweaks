@@ -279,9 +279,9 @@ Fill out an [issue form](https://github.com/fosterbarnes/YTPlusYTweaks/issues) w
 
 <details>
   <summary>YTUHD</summary>
-  <p>YTUHD is a tweak developed by <a href="https://github.com/PoomSmart">PoomSmart</a> that unlocks 1440p (2K) and 2160p (4K) resolutions in the iOS YouTube app.</p>
+  <p>YTUHD is a tweak developed by <a href="https://github.com/PoomSmart">PoomSmart</a> that unlocks 1440p (2K) and 2160p (4K) resolutions in the iOS YouTube app. Forked by <a href="https://github.com/Tonwalter888">Tonwalter888</a> to fix some issues when using the tweak while sideloading</p>
   <p><strong>YTUHD preferences</strong> are available in the <strong>Video quality preferences</strong> section under <strong>YouTube settings</strong>.</p>
-  <p>Source code and additional information are available <a href="https://github.com/PoomSmart/YTUHD">in PoomSmart's GitHub repository</a>.</p>
+  <p>Source code and additional information are available <a href="https://github.com/Tonwalter888/YTUHD">in PoomSmart's GitHub repository</a>.</p>
 </details>
 
 <details>
@@ -351,4 +351,4 @@ Thank you to everyone that made this project possible! This project would not ex
 
 [theos](https://github.com/theos) - theos, SDKs
 
-[Tonwalter888](https://github.com/Tonwalter888/) - SDKs
+[Tonwalter888](https://github.com/Tonwalter888/) - YTUHD, SDKs

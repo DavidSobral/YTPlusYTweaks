@@ -121,6 +121,9 @@ jobs:
         with:
           #path: main
           submodules: recursive
+      
+      - name: Check version
+        uses: ./.github/actions/check-version
 
       - name: Hide sensitive inputs
         uses: levibostian/action-hide-sensitive-inputs@v1
@@ -146,6 +149,21 @@ jobs:
             echo "enabled=false" >> $GITHUB_OUTPUT
             echo "No tweaks enabled"
           fi
+
+      - name: Get commit hashes
+        id: commit_hashes
+        uses: ./.github/actions/get-commit-hashes
+        with:
+          enable_youpip: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_youpip || 'false' }}
+          enable_ytuhd: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_ytuhd || 'false' }}
+          enable_ryd: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_ryd || 'false' }}
+          enable_yougroupsettings: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_yougroupsettings || 'false' }}
+          enable_yq: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_yq || 'false' }}
+          enable_ytabconfig: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_ytabconfig || 'false' }}
+          enable_ytweaks: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_ytweaks || 'false' }}
+          enable_yticons: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_yticons || 'false' }}
+          enable_demc: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_demc || 'false' }}
+          enable_gonerino: ${{ steps.check_tweaks.outputs.enabled == 'true' && inputs.enable_gonerino || 'false' }}
 
       - name: Download and validate IPA
         run: |
@@ -191,13 +209,7 @@ jobs:
         uses: ./.github/actions/cache-theos
         with:
           sdk_version: ${{ inputs.sdk_version }}
-
-      - name: Setup Theos
-        if: steps.check_tweaks.outputs.enabled == 'true'
-        uses: ./.github/actions/setup-theos
-        with:
-          workspace: ${{ github.workspace }}
-          cache_hit: ${{ steps.theos.outputs.cache-hit }}
+          theos_commit: ${{ steps.commit_hashes.outputs.theos }}
 
       - name: Download iOS 16.5 SDK
         if: steps.check_tweaks.outputs.enabled == 'true' && inputs.sdk_version == 16.5 && steps.theos.outputs.cache-hit != 'true'
@@ -217,8 +229,11 @@ jobs:
         with:
           theos_path: ${{ github.workspace }}/theos
 
-      - name: Install cyan
-        run: pipx install --force https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip
+      - name: Cache Cyan
+        id: cache_cyan
+        uses: ./.github/actions/cache-cyan
+        with:
+          cyan_commit: ${{ steps.commit_hashes.outputs.cyan }}
 
       - name: Get YTLite release
         id: ytlite_version
@@ -249,23 +264,8 @@ jobs:
         with:
           theos_path: ${{ github.workspace }}/theos
 
-      - name: Get tweak commit hashes
-        if: steps.check_tweaks.outputs.enabled == 'true'
-        id: tweak_commits
-        uses: ./.github/actions/get-tweak-commit-hashes
-        with:
-          enable_youpip: ${{ inputs.enable_youpip }}
-          enable_ytuhd: ${{ inputs.enable_ytuhd }}
-          enable_ryd: ${{ inputs.enable_ryd }}
-          enable_yougroupsettings: ${{ inputs.enable_yougroupsettings }}
-          enable_yq: ${{ inputs.enable_yq }}
-          enable_ytabconfig: ${{ inputs.enable_ytabconfig }}
-          enable_ytweaks: ${{ inputs.enable_ytweaks }}
-          enable_yticons: ${{ inputs.enable_yticons }}
-          enable_demc: ${{ inputs.enable_demc }}
-          enable_gonerino: ${{ inputs.enable_gonerino }}
-
       - name: Cache tweaks
+        if: steps.check_tweaks.outputs.enabled == 'true'
         id: cache_tweaks_step
         uses: ./.github/actions/cache-tweaks
         with:
@@ -280,17 +280,17 @@ jobs:
           enable_demc: ${{ inputs.enable_demc }}
           enable_gonerino: ${{ inputs.enable_gonerino }}
           sdk_version: ${{ inputs.sdk_version }}
-          youpip_commit: ${{ steps.tweak_commits.outputs.youpip }}
-          ytuhd_commit: ${{ steps.tweak_commits.outputs.ytuhd }}
-          ryd_commit: ${{ steps.tweak_commits.outputs.ryd }}
-          ygs_commit: ${{ steps.tweak_commits.outputs.ygs }}
-          yq_commit: ${{ steps.tweak_commits.outputs.yq }}
-          yabc_commit: ${{ steps.tweak_commits.outputs.yabc }}
-          ytwks_commit: ${{ steps.tweak_commits.outputs.ytwks }}
-          yticons_commit: ${{ steps.tweak_commits.outputs.yticons }}
-          demc_commit: ${{ steps.tweak_commits.outputs.demc }}
-          gonerino_commit: ${{ steps.tweak_commits.outputs.gonerino }}
-          ytvo_commit: ${{ steps.tweak_commits.outputs.ytvo }}
+          youpip_commit: ${{ steps.commit_hashes.outputs.youpip }}
+          ytuhd_commit: ${{ steps.commit_hashes.outputs.ytuhd }}
+          ryd_commit: ${{ steps.commit_hashes.outputs.ryd }}
+          ygs_commit: ${{ steps.commit_hashes.outputs.ygs }}
+          yq_commit: ${{ steps.commit_hashes.outputs.yq }}
+          yabc_commit: ${{ steps.commit_hashes.outputs.yabc }}
+          ytwks_commit: ${{ steps.commit_hashes.outputs.ytwks }}
+          yticons_commit: ${{ steps.commit_hashes.outputs.yticons }}
+          demc_commit: ${{ steps.commit_hashes.outputs.demc }}
+          gonerino_commit: ${{ steps.commit_hashes.outputs.gonerino }}
+          ytvo_commit: ${{ steps.commit_hashes.outputs.ytvo }}
 
       - name: Clone tweaks
         if: steps.check_tweaks.outputs.enabled == 'true'

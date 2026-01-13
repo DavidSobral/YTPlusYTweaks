@@ -3,10 +3,26 @@ name: Cleanup Workflows
 on:
   workflow_dispatch:
     inputs:
-      confirm_cleanup:
-        description: "Type 'DELETE' to confirm cleanup of all workflows, artifacts, caches, and draft releases"
-        required: true
-        type: string
+      delete_workflow_runs:
+        description: "Delete all workflow runs"
+        required: false
+        type: boolean
+        default: true
+      delete_artifacts:
+        description: "Delete all workflow artifacts"
+        required: false
+        type: boolean
+        default: true
+      delete_caches:
+        description: "Delete all workflow caches"
+        required: false
+        type: boolean
+        default: true
+      delete_draft_releases:
+        description: "Delete all draft releases"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -15,19 +31,12 @@ permissions:
 
 jobs:
   cleanup:
-    name: Cleanup Workflows, Artifacts, Caches, and Draft Releases
+    name: Cleanup Workflows
     runs-on: ubuntu-latest
     
     steps:
-      - name: Validate confirmation
-        run: |
-          if [ "${{ inputs.confirm_cleanup }}" != "DELETE" ]; then
-            echo "::error::Confirmation failed. You must type 'DELETE' to proceed."
-            exit 1
-          fi
-          echo "Confirmation validated. Proceeding with cleanup..."
-
-      - name: Delete all workflow runs
+      - name: Delete workflow runs
+        if: inputs.delete_workflow_runs == true
         run: |
           echo "Fetching all workflow runs..."
           
@@ -62,7 +71,8 @@ jobs:
           
           echo "Workflow runs cleanup completed"
 
-      - name: Delete all workflow artifacts
+      - name: Delete workflow artifacts
+        if: inputs.delete_artifacts == true
         run: |
           echo "Fetching all artifacts..."
           
@@ -87,7 +97,8 @@ jobs:
           
           echo "Artifacts cleanup completed"
 
-      - name: Delete all workflow caches
+      - name: Delete workflow caches
+        if: inputs.delete_caches == true
         run: |
           echo "Fetching all caches..."
           
@@ -112,7 +123,8 @@ jobs:
           
           echo "Caches cleanup completed"
 
-      - name: Delete all draft releases
+      - name: Delete draft releases
+        if: inputs.delete_draft_releases == true
         run: |
           echo "Fetching all draft releases..."
           
@@ -140,5 +152,16 @@ jobs:
       - name: Summary
         run: |
           echo "::notice::Cleanup completed successfully!"
-          echo "::notice::All workflow runs, artifacts, caches, and draft releases have been deleted."
-
+          echo "::notice::Deleted items:"
+          if [ "${{ inputs.delete_workflow_runs }}" == "true" ]; then
+            echo "::notice::- Workflow runs"
+          fi
+          if [ "${{ inputs.delete_artifacts }}" == "true" ]; then
+            echo "::notice::- Artifacts"
+          fi
+          if [ "${{ inputs.delete_caches }}" == "true" ]; then
+            echo "::notice::- Caches"
+          fi
+          if [ "${{ inputs.delete_draft_releases }}" == "true" ]; then
+            echo "::notice::- Draft releases"
+          fi

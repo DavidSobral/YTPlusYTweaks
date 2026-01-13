@@ -1,0 +1,37 @@
+name: 'Cache Cyan'
+description: 'Cache pipx cyan installation to speed up workflow runs'
+
+inputs:
+  cyan_commit:
+    description: 'Commit hash from pyzule-rw repository'
+    required: true
+  cache_version:
+    description: 'Manual cache version for invalidation'
+    required: false
+    default: 'v1'
+
+outputs:
+  cache-hit:
+    description: 'Whether the cache was restored'
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache Cyan installation
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.local/pipx/venvs/cyan
+          ~/.local/bin/cyan
+          ~/.local/bin/cgen
+        key: pipx-cyan-${{ runner.os }}-${{ inputs.cyan_commit }}-${{ inputs.cache_version }}
+        restore-keys: |
+          pipx-cyan-${{ runner.os }}-${{ inputs.cyan_commit }}-
+          pipx-cyan-${{ runner.os }}-
+
+    - name: Install Cyan
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: pipx install --force https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip
