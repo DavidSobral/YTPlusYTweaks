@@ -264,8 +264,9 @@ Fill out an [issue form](https://github.com/fosterbarnes/YTPlusYTweaks/issues) w
 
 ## Supported YouTube Version
 <ul>
-   <li><strong>Latest confirmed:</strong> <em>20.50.6</em></li>
-   <li><strong>Date tested:</strong> <em>Dec 18, 2025</em></li>
+    <li><strong>Recommended:</strong> <em>20.10.4</em></li>
+   <li><strong>Latest confirmed:</strong> <em>21.02.3</em></li>
+   <li><strong>Date tested:</strong> <em>Jan 17, 2025</em></li>
    <li><strong>YouTube Plus:</strong> <em>5.2 beta 4</em></li>
 </ul>
 
