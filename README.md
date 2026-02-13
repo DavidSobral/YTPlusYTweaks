@@ -27,7 +27,7 @@ Original repo: https://github.com/dayanch96/YTLite
 ## How to build a YTPlusYTweaks app
 If you just need to build the YouTube app without much fuss, use GitHub actions. Actions are easy to set up, but slow to run.
 
-If you plan on testing, adding other tweaks, making changes, or building very frequently, build locally. Building locally on your computer takes a bit of setup initially, but is much quicker than actions after setup.
+If you plan on testing, adding tweaks that aren't integrated with this repo, making changes, or building very frequently, build locally. Building locally on your computer takes a bit of setup initially, but is much quicker than actions after setup.
 
 ### GitHub Actions
 > [!NOTE]
