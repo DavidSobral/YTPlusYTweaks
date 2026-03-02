@@ -30,6 +30,8 @@ ROOT_DIR="$(pwd)"
 BUILD_DIR="$(pwd)/build"
 USE_PREBUILT_DEBS=false
 THEOS_COMMIT="67db2ab8d950910161730de77c322658ea3e6b44"
+SDK_VERSION="16.5"
+APP_VERSION=""
 
 # Functions to print colored output
 print_info() { echo -e "${BLUE}[INFO]${NC} $1" 
@@ -56,6 +58,7 @@ IPAs Source:
 
 Optional Arguments:
     --deb                        Use pre-built .deb files from deb/ folder. Otherwise, build from source.
+    --sdk <version>              iOS SDK version: 16.5, 17.5, or 18.6 (default: 16.5)
     --tweak-version <version>    Version of YTLite tweak (default: auto-detect latest)
     --display-name <name>        App display name (default: YouTube)
     --bundle-id <id>             Bundle ID (default: com.google.ios.youtube)
@@ -91,6 +94,7 @@ Other Options:
 
 Examples:
     $0 --ipa https://example.com/youtube.ipa
+    $0 --ipa --sdk 17.5
     $0 --ipa --deb --disable-all
     $0 --ipa --disable-yticons --enable-ytweaks
 
@@ -112,6 +116,18 @@ parse_args() {
                     IPA_SOURCE=""
                     shift
                 fi
+                ;;
+            --sdk)
+                SDK_VERSION="$2"
+                case "$SDK_VERSION" in
+                    16.5|17.5|18.6) ;;
+                    *)
+                        print_error "Unsupported SDK version: $SDK_VERSION (use 16.5, 17.5, or 18.6)"
+                        usage
+                        exit 1
+                        ;;
+                esac
+                shift 2
                 ;;
             --tweak-version)
                 TWEAK_VERSION="$2"
@@ -220,6 +236,88 @@ parse_args() {
         usage
         exit 1
     fi
+}
+
+# Ensure THEOS is set (e.g. from build_dependencies.sh or environment)
+ensure_theos() {
+    if [[ -z "${THEOS:-}" ]]; then
+        THEOS="$HOME/theos"
+        export THEOS
+        print_info "THEOS not set; using $THEOS"
+    fi
+    if [[ ! -d "$THEOS" ]]; then
+        print_error "THEOS directory not found: $THEOS. Run build_dependencies.sh first."
+        exit 1
+    fi
+}
+
+# Download and install the selected iOS SDK if not already present.
+ensure_sdk() {
+    ensure_theos
+    mkdir -p "$THEOS/sdks"
+    local sdk_dir="$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
+    if [[ -d "$sdk_dir" ]]; then
+        print_info "iOS SDK $SDK_VERSION already present at $sdk_dir"
+        return
+    fi
+    print_info "Downloading iOS $SDK_VERSION SDK..."
+    local tmp_sdk=$(mktemp -d)
+    (
+        cd "$tmp_sdk"
+        case "$SDK_VERSION" in
+            16.5)
+                git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
+                cd sdks
+                git sparse-checkout set --no-cone iPhoneOS16.5.sdk
+                git checkout
+                mv *.sdk "$THEOS/sdks/"
+                ;;
+            17.5)
+                git clone --quiet --no-tags --single-branch --depth=1 -n --filter=tree:0 https://github.com/Tonwalter888/iOS-SDKs
+                cd iOS-SDKs
+                git sparse-checkout set --no-cone iPhoneOS17.5.sdk
+                git checkout
+                mv *.sdk "$THEOS/sdks/"
+                ;;
+            18.6)
+                git clone --quiet --no-tags --single-branch --depth=1 -n --filter=tree:0 https://github.com/Tonwalter888/iOS-SDKs
+                cd iOS-SDKs
+                git sparse-checkout set --no-cone iPhoneOS18.6.sdk
+                git checkout
+                mv *.sdk "$THEOS/sdks/"
+                ;;
+            *)
+                print_error "Unsupported SDK version: $SDK_VERSION"
+                exit 1
+                ;;
+        esac
+    )
+    rm -rf "$tmp_sdk"
+    if [[ ! -d "$sdk_dir" ]]; then
+        print_error "Failed to install iOS SDK $SDK_VERSION"
+        exit 1
+    fi
+    print_success "iOS SDK $SDK_VERSION installed"
+}
+
+# Extract app version (CFBundleShortVersionString) from the IPA for output naming
+get_app_version() {
+    print_info "Extracting app version from IPA..."
+    local info_plist
+    info_plist=$(unzip -l "$BUILD_DIR/youtube.ipa" | grep -o "Payload/[^/]*\.app/Info\.plist" | head -n 1)
+    if [[ -z "$info_plist" ]]; then
+        print_error "Could not find Info.plist in IPA"
+        exit 1
+    fi
+    local extract_dir="$BUILD_DIR/ipa_extract"
+    mkdir -p "$extract_dir"
+    unzip -p "$BUILD_DIR/youtube.ipa" "$info_plist" > "$extract_dir/Info.plist"
+    APP_VERSION=$(plutil -p "$extract_dir/Info.plist" 2>/dev/null | grep "CFBundleShortVersionString" | sed -E 's/.*"CFBundleShortVersionString"[[:space:]]*=>[[:space:]]*"([^"]+)".*/\1/')
+    if [[ -z "$APP_VERSION" ]]; then
+        print_error "Could not extract app version from Info.plist"
+        exit 1
+    fi
+    print_success "App version: $APP_VERSION"
 }
 
 # Check if any tweaks are enabled
@@ -753,14 +851,13 @@ inject_tweaks() {
         done
     fi
     
-    # Determine output IPA name, appending number if file exists
-    base_ipa="YTPlusYTweaks_${TWEAK_VERSION}.ipa"
-    output_ipa="$base_ipa"
+    # Workflow-style output name: YTPlusYTweaks_<tweak>_SDK<version>_v<app>.ipa
+    # If file exists, use _1, _2, _3 ... before .ipa
+    base_name="YTPlusYTweaks_${TWEAK_VERSION}_SDK${SDK_VERSION}_v${APP_VERSION}"
+    output_ipa="${base_name}.ipa"
     counter=1
-    
-    # Check if base name exists, append number if needed
     while [[ -f "$ROOT_DIR/$output_ipa" ]]; do
-        output_ipa="YTPlusYTweaks_${TWEAK_VERSION}_${counter}.ipa"
+        output_ipa="${base_name}_${counter}.ipa"
         ((counter++))
     done
     
@@ -790,6 +887,7 @@ cleanup_build() {
 # Main function
 main() {
     print_info "Starting YTPlusYTweaks build process..."
+    print_info "SDK version: $SDK_VERSION"
     print_info "Tweak version: $TWEAK_VERSION"
     print_info "Display name: $DISPLAY_NAME"
     print_info "Bundle ID: $BUNDLE_ID"
@@ -811,7 +909,11 @@ main() {
     
     setup_workspace
     setup_ipa
+    get_app_version
     get_latest_version
+    if any_tweaks_enabled; then
+        ensure_sdk
+    fi
     download_ytplus
     clone_safari_extension
     clone_youtube_header

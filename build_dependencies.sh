@@ -66,8 +66,6 @@ mkdir -p "$THEOS_DIR"
 cd "$THEOS_DIR"
 echo "   Cloning Theos repository (this may take a moment)..."
 git clone --recursive https://github.com/theos/theos.git .
-echo "   Checking out specific Theos version..."
-git checkout 67db2ab8d950910161730de77c322658ea3e6b44
 echo "   Adding Theos to shell profile..."
 echo "export THEOS=\"$THEOS_DIR\"" >> "$PROFILE"
 echo 'export PATH=$THEOS/bin:$PATH' >> "$PROFILE"
@@ -75,16 +73,47 @@ export THEOS="$THEOS_DIR"
 echo "   Theos installed at: $THEOS"
 
 echo ""
-echo "[Step 5/7] Downloading iOS 16.5 SDK..."
+echo "[Step 5/7] Downloading iOS SDKs..."
 cd "$THEOS_DIR"
 rm -rf sdks
-echo "   Cloning iOS SDK repository..."
-git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
-cd sdks
-echo "   Downloading iPhoneOS16.5.sdk..."
-git sparse-checkout set --no-cone iPhoneOS16.5.sdk
-git checkout
-echo "   Done!"
+mkdir -p sdks
+
+echo "   [1/3] iPhoneOS16.5.sdk (theos/sdks)..."
+(
+    tmp=$(mktemp -d)
+    cd "$tmp"
+    git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
+    cd sdks
+    git sparse-checkout set --no-cone iPhoneOS16.5.sdk
+    git checkout
+    mv *.sdk "$THEOS_DIR/sdks/"
+    rm -rf "$tmp"
+)
+
+echo "   [2/3] iPhoneOS17.5.sdk (Tonwalter888/iOS-SDKs)..."
+(
+    tmp=$(mktemp -d)
+    cd "$tmp"
+    git clone --quiet --no-tags --single-branch --depth=1 -n --filter=tree:0 https://github.com/Tonwalter888/iOS-SDKs
+    cd iOS-SDKs
+    git sparse-checkout set --no-cone iPhoneOS17.5.sdk
+    git checkout
+    mv *.sdk "$THEOS_DIR/sdks/"
+    rm -rf "$tmp"
+)
+
+echo "   [3/3] iPhoneOS18.6.sdk (Tonwalter888/iOS-SDKs)..."
+(
+    tmp=$(mktemp -d)
+    cd "$tmp"
+    git clone --quiet --no-tags --single-branch --depth=1 -n --filter=tree:0 https://github.com/Tonwalter888/iOS-SDKs
+    cd iOS-SDKs
+    git sparse-checkout set --no-cone iPhoneOS18.6.sdk
+    git checkout
+    mv *.sdk "$THEOS_DIR/sdks/"
+    rm -rf "$tmp"
+)
+echo "   Done! Installed $(ls "$THEOS_DIR/sdks/" | wc -l | xargs) SDK(s)"
 
 echo ""
 echo "[Step 6/7] Installing Cyan..."
@@ -117,7 +146,8 @@ echo "3. Theos:"
 echo "   THEOS: $THEOS"
 if [ -d "$THEOS" ]; then
     echo "   Theos exists: ✓"
-    echo "   SDKs: $(ls $THEOS/sdks/ 2>/dev/null | wc -l | xargs) SDK(s) found"
+    echo "   SDKs installed:"
+    ls "$THEOS/sdks/" 2>/dev/null | sed 's/^/     - /' || echo "     (none)"
 else
     echo "   Theos exists: ✗"
 fi
