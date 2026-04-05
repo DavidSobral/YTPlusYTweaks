@@ -70,7 +70,7 @@ If you plan on testing, adding tweaks that aren't integrated with this repo, mak
 <strong>Additional workflow options:</strong><br>
 - The version of YTLite to use:<br>
   <em>Input a release tag from [dayanch96/YTLite/tags](https://github.com/dayanch96/YTLite/tags)</em><br>
-  Example: `5.2b3` or `v5.2b3`<br>
+  Example: `5.2b3` or `v5.2b4`<br>
 - iOS SDK Version:<br>
   <em>16.5 should be used for older devices, 18.6 can be used for newer devices</em><br>
   Example: `16.5`<br>
@@ -270,8 +270,8 @@ Fill out an [issue form](https://github.com/fosterbarnes/YTPlusYTweaks/issues) w
 ## Supported YouTube Version
 <ul>
     <li><strong>Recommended:</strong> <em>20.10.4</em></li>
-   <li><strong>Latest confirmed:</strong> <em>21.02.3</em></li>
-   <li><strong>Date tested:</strong> <em>Jan 17, 2025</em></li>
+   <li><strong>Latest confirmed:</strong> <em>21.13.6</em></li>
+   <li><strong>Date tested:</strong> <em>April 4, 2026</em></li>
    <li><strong>YouTube Plus:</strong> <em>5.2 beta 4</em></li>
 </ul>
 
